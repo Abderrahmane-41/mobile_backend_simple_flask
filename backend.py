@@ -1,38 +1,48 @@
-from flask import Flask
+from flask import Flask, jsonify
+from flask_cors import CORS
 import json
-import datetime
+import os
 
 app = Flask(__name__)
+CORS(app)
 
-
-@app.route('/news.all.get')
-def get_news_all_articles():
-	data=[]
-	with open('news_data.json', 'r') as file:
-		data = json.load(file)
-	app.logger.debug('_________________Hello '+str(data))
-	return json.dumps(data)
-
-
-@app.route('/news.categories.get')
-def get_news_categories():
-	time_now_str=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-	data={
-     	'title':'List of Categories',
-      	'time':time_now_str,
-       	'categories':[
-            	{'id':1,'name':'Sports'},
-             	{'id':2,'name':'Politics'},
-              	{'id':3,'name':'Education'}]
-       }
-	return json.dumps(data)
-
+# Load news data from JSON file
+def load_news_data():
+    try:
+        json_path = os.path.join(os.path.dirname(__file__), 'news_data.json')
+        with open(json_path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print("Error: news_data.json not found")
+        return []
+    except json.JSONDecodeError:
+        print("Error: Invalid JSON in news_data.json")
+        return []
 
 @app.route('/')
-def index():
-	return 'Welcome ENSIA Students from Flask!'
+def home():
+    return jsonify({
+        "message": "News Backend API",
+        "version": "1.0",
+        "status": "running",
+        "endpoints": {
+            "/api/news": "GET - Fetch all news articles"
+        }
+    })
 
-if __name__ == "__main__":
-	app.run(port=8080)
+@app.route('/api/news', methods=['GET'])
+def get_news():
+    news_data = load_news_data()
+    return jsonify({
+        "status": "success",
+        "data": news_data,
+        "count": len(news_data)
+    })
 
+@app.route('/health')
+def health():
+    return jsonify({"status": "healthy"}), 200
 
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 8080))
+    app.run(host='0.0.0.0', port=port, debug=False)
