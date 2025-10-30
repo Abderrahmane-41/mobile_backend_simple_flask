@@ -26,7 +26,9 @@ def home():
         "version": "1.0",
         "status": "running",
         "endpoints": {
-            "/api/news": "GET - Fetch all news articles"
+            "/api/news": "GET - Fetch all news articles",
+            "/health": "GET - Health check",
+            "/kaithheathcheck": "GET - Leapcell health check"
         }
     })
 
@@ -41,6 +43,11 @@ def get_news():
 
 @app.route('/health')
 def health():
+    return jsonify({"status": "healthy"}), 200
+
+# Add Leapcell's health check endpoint
+@app.route('/kaithheathcheck')
+def kaith_health_check():
     return jsonify({"status": "healthy"}), 200
 
 if __name__ == '__main__':
