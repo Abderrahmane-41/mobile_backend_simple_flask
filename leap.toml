@@ -1,0 +1,3 @@
+# leap.toml
+app = "news-backend-api"
+entrypoint = "backend.py"
